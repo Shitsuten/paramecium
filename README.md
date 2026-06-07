@@ -189,7 +189,7 @@ cd chat-api && node server.mjs &
 
 - [kiwi-mem](https://github.com/LucieEveille/kiwi-mem) — @luicethekiwi
 - [Ombre-Brain](https://github.com/P0luz/Ombre-Brain) — @P0luz
-- [☁️的记忆系统搭建教程](https://elemental-jupiter-426.notion.site/354af138bfe7808e8318e79678f5b99b) — [@cloudsantal4pei](https://x.com/cloudsantal4pei)
+- [☁️的记忆系统搭建教程](https://elemental-jupiter-426.notion.site/354af138bfe7808e8318e79678f5b99b) — @cloudsantal4pei
 - [stella 的记忆库](https://x.com/qichuanzz/status/2048700361825751257) — @qichuanzz
 - [memory-gateway](https://github.com/londonraven1666-ai/memory-gateway) — @londonraven1666
 - [prompt cache 分段优化](https://github.com/NyraSeithhh/cache) — @NyraSeithhh
