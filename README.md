@@ -183,6 +183,18 @@ cd chat-api && node server.mjs &
 - `data/` 目录包含对话记录，建议 `.gitignore`
 - admin 面板没有内置认证，请用 nginx basic auth 或 IP 白名单保护
 
+## 致谢
+
+以下项目和分享对 Paramecium 的设计有启发：
+
+- [kiwi-mem](https://github.com/LucieEveille/kiwi-mem) — @luicethekiwi
+- [Ombre-Brain](https://github.com/P0luz/Ombre-Brain) — @P0luz
+- [☁️的记忆系统搭建教程](https://elemental-jupiter-426.notion.site/354af138bfe7808e8318e79678f5b99b)
+- [stella 的记忆库](https://x.com/qichuanzz/status/2048700361825751257) — @qichuanzz
+- [memory-gateway](https://github.com/londonraven1666-ai/memory-gateway) — @londonraven1666
+- [prompt cache 分段优化](https://github.com/NyraSeithhh/cache) — @NyraSeithhh
+- [图片转述省 token 思路](https://x.com/vital_zzl/status/2062683368555159878) — @vital_zzl
+
 ## License
 
 MIT
