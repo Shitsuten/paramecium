@@ -86,7 +86,7 @@ L0 档案层更狠：**零 AI**。纯机械按句界切段、贪心打包成窗�
 
 **记忆网关**负责让 AI 记住你说过的话：
 
-1. **语义搜索** — ChromaDB 向量 + jieba BM25 双路召回（两个固定权重的 attention head：语义头 + 词面头）
+1. **语义搜索** — ChromaDB 向量 + jieba BM25 双路召回（两个固定权重的 attention head：语义头 + 词面头），RRF 排名融合——向量距离和 BM25 分数的量纲对不齐，但排名对得齐
 2. **逐字检索** — FTS5 全文索引，找"她原话怎么说的"
 3. **档案搜索** — 聊天原文窗口的语义检索，带相关性地板（没结果好过垃圾结果）、单会话条数上限（一场对话不许刷屏）、日期过滤
 4. **自动提取** — 对话自动进 L1（带引用）和 L0（纯机械）
@@ -150,7 +150,7 @@ gateway 调记忆网关 /inject
 记忆网关:
     1. 读 profiles（L2 画像，进缓存段）
     2. 读 facts（固定事实，关键词触发）
-    3. 语义搜索（向量 + BM25 混合排序 × 新近度 × 访问加成）
+    3. 语义搜索（向量 + BM25 的 RRF 排名融合 × 新近度 × 访问加成）
     4. 只返回目录索引——一行一条，不给全文（~150 token，原来塞全文要 1000+）
     ↓
 gateway 拼装 prompt → 发给上游 API
@@ -172,6 +172,8 @@ L1: extract-memories.mjs
     2. 便宜模型圈信息点，每条附 10-40 字逐字引用，宁缺勿滥
     3. 机械校验引用确实在原文里（机械 > prompt，不信模型自觉）
     4. 存入 ChromaDB（向量）+ SQLite（元数据）
+    5. 矛盾自动失效：新记忆与旧记忆高置信度冲突/更新时，旧条目标记
+       superseded——退出排名但不删除（可逆），手动 pin 的记忆神圣不可侵犯
     ↓
 L0: archive-import.mjs（零 AI）
     1. 按句界切段（≤350 字）
@@ -246,7 +248,7 @@ crontab -e
 
 以下项目和分享对 Paramecium 的设计有启发：
 
-- [kiwi-mem](https://github.com/LucieEveille/kiwi-mem) — @luicethekiwi
+- [kiwi-mem](https://github.com/LucieEveille/kiwi-mem) — @luicethekiwi（矛盾自动失效和 RRF 排名融合借鉴于此；我们对"记忆该不该遗忘"答案相反，但好东西就是好东西）
 - [Ombre-Brain](https://github.com/P0luz/Ombre-Brain) — @P0luz
 - [☁️的记忆系统搭建教程](https://elemental-jupiter-426.notion.site/354af138bfe7808e8318e79678f5b99b) — @cloudsantal4pei
 - [stella 的记忆库](https://x.com/qichuanzz/status/2048700361825751257) — @qichuanzz
