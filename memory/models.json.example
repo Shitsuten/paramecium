@@ -1,0 +1,23 @@
+{
+  "embedding": {
+    "name": "BAAI/bge-small-zh-v1.5",
+    "library": "fastembed",
+    "dimensions": 384,
+    "description": "BGE small Chinese embedding model（本地跑，不要钱）",
+    "endpoint": "local (fastembed)"
+  },
+  "extraction": {
+    "name": "deepseek/deepseek-chat-v3-0324",
+    "provider": "openrouter",
+    "description": "便宜模型，负责记忆摘录（圈重点+逐字引用）",
+    "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+    "apiKey": "sk-or-v1-你的key"
+  },
+  "compression": {
+    "name": "deepseek/deepseek-chat-v3-0324",
+    "provider": "openrouter",
+    "description": "便宜模型，负责有损压缩——图片转述和会话摘要",
+    "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+    "apiKey": "sk-or-v1-你的key"
+  }
+}

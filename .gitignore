@@ -1,0 +1,25 @@
+# 密钥（绝对不要提交）
+memory/models.json
+chat-api/data/settings.json
+
+# 对话与记忆数据（你们的私事）
+chat-api/data/
+chat-api/images/
+memory/meta.db
+memory/raw-archive.db
+memory/vectors/
+memory/chroma*/
+memory/edges.jsonl
+memory/profile/
+memory/facts/
+
+# 运行状态与日志
+memory/*.log
+memory/*-state.json
+memory/extraction-cache.json
+memory/__pycache__/
+
+# 备份
+*.bak*
+*.pre-*
+attic/
