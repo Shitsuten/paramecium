@@ -470,8 +470,11 @@ def search_memories(query, n=5, boost_heat=True, log_access=None):
     return items[:n]
 
 # ── Inject: the core endpoint ──
-def build_injection(context=''):
-    """Build memory injection. Profiles (static) + facts + semantic search (budget-limited)."""
+def build_injection(context='', echo=''):
+    """Build memory injection. Profiles (static) + facts + semantic search (budget-limited).
+    echo: the assistant's previous reply ("回复的余味", 2026-06-12) — a second
+    query lane so what the AI just said shapes what surfaces next turn.
+    Query-side only; no stored vectors are touched. Empty echo = lane off."""
     parts_static = []
     parts_dynamic = []
 
@@ -492,6 +495,7 @@ def build_injection(context=''):
     # full documents (~150 tok vs ~1000+). Full content is pulled on demand by
     # the gateway's built-in recall tool; only that counts as access.
     search_results = []
+    echo_hits = 0
     if context:
         search_results = search_memories(context, n=5, log_access=False)
         # Relative filter (2026-06-10): natural-sentence queries sit at dist
@@ -500,6 +504,16 @@ def build_injection(context=''):
         if search_results:
             best = min(r['distance'] for r in search_results)
             search_results = [r for r in search_results if r['distance'] < min(best + 0.15, 0.65)]
+        # Echo lane (2026-06-12): query with the assistant's previous reply,
+        # merge after the user lane, dedupe by id. Hard junk line only (no
+        # relative filter — the lanes shouldn't gate each other).
+        if echo:
+            echo_results = search_memories(echo, n=3, log_access=False)
+            seen = {r['id'] for r in search_results}
+            for r in echo_results:
+                if r['distance'] < 0.65 and r['id'] not in seen:
+                    search_results.append(r)
+                    echo_hits += 1
         if search_results:
             idx_lines = []
             for r in search_results:
@@ -527,6 +541,7 @@ def build_injection(context=''):
         'dynamic': dynamic_text,
         'token_estimate': count_tokens_cjk(injection),
         'semantic_hits': len(search_results),
+        'echo_hits': echo_hits,
         'facts_injected': len(facts),
     }
 
@@ -652,7 +667,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == '/inject':
             body = self._read_body()
             context = body.get('context', '')
-            result = build_injection(context)
+            echo = body.get('echo', '')
+            result = build_injection(context, echo)
             self._json(result)
 
         # ── /search — semantic search ──

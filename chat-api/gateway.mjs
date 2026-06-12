@@ -218,14 +218,16 @@ function getRecentDiaries(days = 2) {
 //  Memory Injection
 // ============================================================
 
-async function getMemoryInjection(context) {
+async function getMemoryInjection(context, echo = '') {
   // 2026-06-11: call the memory gateway (3900) directly — the old hop through
   // 3800's /memory/v2/inject only added a dead supplement read.
+  // 2026-06-12: echo = the assistant's previous reply, sent as a second query
+  // lane ("回复的余味") — what the AI just said shapes what surfaces next turn.
   try {
     const resp = await fetch('http://127.0.0.1:3900/inject', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ context }),
+      body: JSON.stringify({ context, echo }),
       // 5s cap: degrade to no injection rather than stall /gateway/send before
       // headers are written (→ nginx 504). 3900 is threaded now (2026-06-11),
       // but a slow ChromaDB query or rebuild can still hang a request.
@@ -937,7 +939,11 @@ export async function handleGatewaySend(reqBody, res) {
   // Memory injection
   const recentContext = conv.messages.filter(m => m.role === 'user').slice(-3)
     .map(m => typeof m.content === 'string' ? m.content : '').join(' ').trim();
-  const injection = recentContext ? await getMemoryInjection(recentContext) : { static: '', dynamic: '', memory_ids: [] };
+  const lastReply = conv.messages.filter(m => m.role === 'assistant').slice(-1)
+    .map(m => typeof m.content === 'string' ? m.content
+      : Array.isArray(m.blocks) ? m.blocks.filter(b => b.type === 'text').map(b => b.text || '').join(' ')
+      : '').join('').trim().slice(0, 500);
+  const injection = recentContext ? await getMemoryInjection(recentContext, lastReply) : { static: '', dynamic: '', memory_ids: [] };
 
   // Build request
   const systemBlocks = buildSystemBlocks(settings, injection, conv, isAnthropic);
@@ -1263,7 +1269,11 @@ export async function getContextBlocks(convId) {
 
   const recentContext = conv?.messages?.filter(m => m.role === 'user').slice(-3)
     .map(m => typeof m.content === 'string' ? m.content : '').join(' ').trim() || '';
-  const injection = await getMemoryInjection(recentContext || "general context");
+  const lastReply = (conv?.messages || []).filter(m => m.role === 'assistant').slice(-1)
+    .map(m => typeof m.content === 'string' ? m.content
+      : Array.isArray(m.blocks) ? m.blocks.filter(b => b.type === 'text').map(b => b.text || '').join(' ')
+      : '').join('').trim().slice(0, 500);
+  const injection = await getMemoryInjection(recentContext || "general context", lastReply);
 
   // BP1: Personality + profiles
   let bp1 = settings.systemPrompt || '';
