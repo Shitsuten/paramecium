@@ -687,7 +687,8 @@ function proxyStream(endpoint, apiKey, body, clientRes, conv, account, injection
           model: state.model, provider: isAnthropic ? 'anthropic' : 'openai',
           usage: state.usage || {}, cacheRead, cacheCreate, inputTotal,
           memoryHits: injection.facts_injected || 0,
-          semanticHits: injection.semantic_hits || 0
+          semanticHits: injection.semantic_hits || 0,
+          echoHits: injection.echo_hits || 0
         });
 
         // Auto-ingest <mem> tags
@@ -1084,7 +1085,7 @@ export async function handleGatewaySend(reqBody, res) {
     const _cr = lastUsage?.cache_read_input_tokens || 0;
     const _cc = lastUsage?.cache_creation_input_tokens || 0;
     const _it = lastUsage?.input_tokens || 0;
-    appendStat({ ts: Date.now(), conv: conv.id, account: account.name, model: lastModel, provider: 'anthropic', usage: lastUsage || {}, cacheRead: _cr, cacheCreate: _cc, inputTotal: _it, memoryHits: injection.facts_injected || 0, semanticHits: injection.semantic_hits || 0 });
+    appendStat({ ts: Date.now(), conv: conv.id, account: account.name, model: lastModel, provider: 'anthropic', usage: lastUsage || {}, cacheRead: _cr, cacheCreate: _cc, inputTotal: _it, memoryHits: injection.facts_injected || 0, semanticHits: injection.semantic_hits || 0, echoHits: injection.echo_hits || 0 });
     if (fullText.includes('<mem')) {
       try { await fetch('http://127.0.0.1:3800/ingest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: fullText }) }); } catch {}
     }
