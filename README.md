@@ -294,7 +294,8 @@ crontab -e
 - `models.json` 包含 API 密钥，**绝对不要提交到 git**
 - `data/` 目录包含对话记录，`images/` 包含图片原件，建议 `.gitignore`
 - admin 面板没有内置认证，请用 nginx basic auth 或 IP 白名单保护
-- 内置 exec 工具等于给 AI 一个 shell——网关只应监听 localhost，公网入口务必加认证
+- **不建议启用 exec 工具**。exec 等于给 AI 一个不受限的 shell——如果你用的是中转站（而非直连 Anthropic），你的所有 exec 命令和输出都经过第三方服务器明文可见，包括 SSH 配置、文件列表、进程信息等服务器拓扑。我们自己踩过这个坑后已将 exec 从默认工具中移除。**只用 recall 读记忆就够了**，需要操作服务器请自己 SSH 或通过不经中转站的可信客户端（如 Claude Code）
+- 如果你确实需要 exec：网关只应监听 localhost、加命令黑名单（`rm -r` / `dd` / `shutdown` / `iptables -F` / 读 `.ssh/` 等）、公网入口务必加认证
 
 ## 致谢
 
